@@ -155,27 +155,40 @@ def restart_test():
     speak_word(word_list[n_current_idx])
 
 
+def load_data_set():
+    b_1A = True 
+    #1A
+    _word_list = []
+    if b_1A:
+        idx_useful =(21, 30)
+        idx_reading = (9, 16)
+        with open('1A_useful_words.json', 'r') as f:
+            dic_words = json.load(f)
+        for i in range(idx_useful[0], idx_useful[1]+1):
+            _word_list.append(dic_words[str(i)])
+        with open('1A_reading_science.json', 'r') as f:
+            dic_words = json.load(f)
+        for i in range(idx_reading[0], idx_reading[1]+1):
+            _word_list.append(dic_words[str(i)])
+    else:
+        #5A 
+        # word_list = ['reject', 'continue', 'remind', 'congratulations', 'interrupt', 'terrific', 'unique', 'satisfy', 'ordinary', 'consider']
+
+        with open('5_spelling_bee.json', 'r') as f:
+            dic_words = json.load(f)
+        for i in range(21, 31):
+            _word_list.append(dic_words[str(i)])
+    log_data(f'This time word list:{word_list}')
+    return _word_list
+
+
 def main():
     global word_list
     global root, entry, label_current_progress
     global n_total
     global custom_font
+    word_list = load_data_set()
 
-
-    #1A
-    word_list = [ 'carry', 'show', 'before', 'think', 'plant' , 'roots', 'stem', 'hold' ]
-    word_extra = [ 'arm', 'airplane', 'April', 'bakery', 'bottom', 'camera', 'classmate', 'classroom', 'dark', 'daughter', 'December', 'dish', 'easy', 'exam', 'false', 'farmer', 'February', 'floor', 'follow', 'friend' ]
-
-    word_list.extend(word_extra)
-
-    #5A 
-    # word_list = ['reject', 'continue', 'remind', 'congratulations', 'interrupt', 'terrific', 'unique', 'satisfy', 'ordinary', 'consider']
-    word_list = []
-    with open('5_spelling_bee.json', 'r') as f:
-        dic_words = json.load(f)
-    for i in range(21, 31):
-        word_list.append(dic_words[str(i)])
-    log_data(f'This time word list:{word_list}')
     random.shuffle(word_list)
 
     
