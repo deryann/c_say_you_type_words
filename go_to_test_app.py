@@ -7,6 +7,8 @@ import logging
 from tkinter import font as tkFont
 import winsound
 
+from PIL import Image, ImageTk
+
 
 # Configure logger
 logging.basicConfig(level=logging.INFO,
@@ -33,7 +35,7 @@ def log_data(message, level="info"):
         logger.info(message)
 
 
-def custom_messagebox(title, message, font):
+def custom_messagebox(title, message, font, icon=None):
     global root
     root.update_idletasks()
     custom_box = tk.Toplevel()
@@ -43,6 +45,14 @@ def custom_messagebox(title, message, font):
     custom_box.geometry(f"+{x}+{y}")
     
     custom_box.title(title)
+
+    if icon is not None:
+        jpg_file = f'{icon}'
+        image = Image.open(jpg_file)
+        img = ImageTk.PhotoImage(image)
+        icon_label = tk.Label(custom_box, image=img)
+        icon_label.pack(padx=20, pady=20)
+
     
     message_label = tk.Label(custom_box, text=message, font=font)
     message_label.pack(padx=20, pady=20)
@@ -120,14 +130,14 @@ def check_word():
         winsound.PlaySound("yes.wav", winsound.SND_FILENAME)
 
 
-        custom_messagebox("Result", "Correct!", font=custom_font_tuple)
+        custom_messagebox("Result", "Correct!", font=custom_font_tuple, icon="r.jpg")
         log_data("O: "+word_list[n_current_idx])
 
     else:
         wrong += 1
         log_data("X: "+word_list[n_current_idx] + " Your answer: " + user_input)
         winsound.PlaySound("no.wav", winsound.SND_FILENAME)
-        custom_messagebox("Result", "Wrong! Correct answer is: " + word_list[n_current_idx], font=custom_font_tuple )
+        custom_messagebox("Result", "Wrong! Correct answer is: " + word_list[n_current_idx], font=custom_font_tuple, icon="w.jpg" )
 
     if n_current_idx == n_total - 1:
         
@@ -156,12 +166,12 @@ def restart_test():
 
 
 def load_data_set():
-    b_1A = True 
+    b_1A = True
     #1A
     _word_list = []
     if b_1A:
-        idx_useful =(21, 30)
-        idx_reading = (9, 16)
+        idx_useful =(11, 31)
+        idx_reading = (0, -1)
         with open('1A_useful_words.json', 'r') as f:
             dic_words = json.load(f)
         for i in range(idx_useful[0], idx_useful[1]+1):
