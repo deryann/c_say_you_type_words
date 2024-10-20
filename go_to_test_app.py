@@ -1,3 +1,4 @@
+import datetime 
 import json 
 import random
 import tkinter as tk
@@ -6,15 +7,18 @@ import pyttsx3
 import logging
 from tkinter import font as tkFont
 import winsound
-
 from PIL import Image, ImageTk
 
+
+CONST_CURRENT_TEST_DATA_SET = "1A" # "1A" or "AL"
+
+gamer_id = "Vic"
 
 # Configure logger
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s',
                     handlers=[
-                        logging.FileHandler("testing.log"),
+                        logging.FileHandler(f"testing_{CONST_CURRENT_TEST_DATA_SET}_{gamer_id}.log"),
                         logging.StreamHandler()
                     ])
 
@@ -72,6 +76,10 @@ correct = 0
 wrong = 0 
 n_current_idx = 0
 label_current_progress = 0 
+
+dt_start_time = datetime.datetime.now()
+
+CONST_FONT_TUPLE = ("Helvetica", 16)
 
 word_list = []
 
@@ -140,9 +148,11 @@ def check_word():
         custom_messagebox("Result", "Wrong! Correct answer is: " + word_list[n_current_idx], font=custom_font_tuple, icon="w.jpg" )
 
     if n_current_idx == n_total - 1:
-        
-        label_current_progress.config(text=f"{n_current_idx+1}/{n_total}" +f" Correct: {correct}, Wrong: {wrong}")
-        custom_messagebox("Total Result", f"Correct: {correct}, Wrong: {wrong}",  font=custom_font_tuple)
+        dt_end_time = datetime.datetime.now()
+        dt_total_time = dt_end_time - dt_start_time
+        log_data(f"Total time: {dt_total_time}")
+        label_current_progress.config(text=f"{n_current_idx+1}/{n_total}" +f" Correct: {correct}, Wrong: {wrong}\n Total time: {dt_total_time}")
+        custom_messagebox("Total Result", f"Correct: {correct}, Wrong: {wrong} \n Total time: {dt_total_time}",  font=custom_font_tuple)
         log_data(f"Correct: {correct}, Wrong: {wrong}")
     else:
         entry.delete(0, tk.END)
@@ -156,37 +166,41 @@ def check_word():
 
 def restart_test():
     global correct, wrong, n_current_idx, word_list, root
+    global dt_start_time
+    dt_end_time = datetime.datetime.now()
+    dt_total_time = dt_end_time - dt_start_time
+    log_data(f"Total time: {dt_total_time}")
+
     correct = 0 
     wrong = 0 
     n_current_idx = 0
+    dt_start_time = datetime.datetime.now()
     random.shuffle(word_list)
+
     label_current_progress.config(text=f"{n_current_idx+1}/{n_total}" +f" Correct: {correct}, Wrong: {wrong}")
     root.update_idletasks()
     speak_word(word_list[n_current_idx])
 
 
 def load_data_set():
-    b_1A = True
-    #1A
     _word_list = []
-    if b_1A:
-        idx_useful =(11, 31)
-        idx_reading = (0, -1)
+    if CONST_CURRENT_TEST_DATA_SET == "1A":
+        idx_useful =(1, 70)
+        # idx_reading = (0, -1)
         with open('1A_useful_words.json', 'r') as f:
             dic_words = json.load(f)
         for i in range(idx_useful[0], idx_useful[1]+1):
             _word_list.append(dic_words[str(i)])
-        with open('1A_reading_science.json', 'r') as f:
-            dic_words = json.load(f)
-        for i in range(idx_reading[0], idx_reading[1]+1):
-            _word_list.append(dic_words[str(i)])
+        # with open('1A_reading_science.json', 'r') as f:
+        #     dic_words = json.load(f)
+        # for i in range(idx_reading[0], idx_reading[1]+1):
+        #     _word_list.append(dic_words[str(i)])
     else:
-        #5A 
-        # word_list = ['reject', 'continue', 'remind', 'congratulations', 'interrupt', 'terrific', 'unique', 'satisfy', 'ordinary', 'consider']
-
+        #AL
+        ids_t = (1, 30)
         with open('5_spelling_bee.json', 'r') as f:
             dic_words = json.load(f)
-        for i in range(21, 31):
+        for i in range(ids_t[0], ids_t[0]+1):
             _word_list.append(dic_words[str(i)])
     log_data(f'This time word list:{word_list}')
     return _word_list
@@ -206,34 +220,32 @@ def main():
     # Create the main window
     root = tk.Tk()
     root.title("Word Test")
-    # 自定義字型
+
     
     root.geometry("400x600")  # Set the window size
 
     # Create and place widgets
-    entry = tk.Entry(root, font=("Helvetica", 16))
+    entry = tk.Entry(root, font=CONST_FONT_TUPLE)
     entry.pack(pady=20)
 
     n_total = len(word_list)
 
     # show 出目前進度
 
-    label_current_progress = tk.Label(root, text=f"{n_current_idx+1}/{n_total}" +f" Correct: {correct}, Wrong: {wrong}", font=("Helvetica", 16))
+    label_current_progress = tk.Label(root, text=f"{n_current_idx+1}/{n_total}" +f" Correct: {correct}, Wrong: {wrong}", font=CONST_FONT_TUPLE)
     label_current_progress.pack(pady=10)
 
-    submit_button = tk.Button(root, text="送出", command=check_word, font=("Helvetica", 16))
+    submit_button = tk.Button(root, text="送出", command=check_word, font=CONST_FONT_TUPLE)
     submit_button.pack(pady=10)
 
-    replay_button = tk.Button(root, text="重新撥放1", command=replay_word_1, font=("Helvetica", 16))
+    replay_button = tk.Button(root, text="重新撥放1", command=replay_word_1, font=CONST_FONT_TUPLE)
     replay_button.pack(pady=10)
 
-    replay_button = tk.Button(root, text="重新撥放2", command=replay_word_2, font=("Helvetica", 16))
+    replay_button = tk.Button(root, text="重新撥放2", command=replay_word_2, font=CONST_FONT_TUPLE)
     replay_button.pack(pady=10)
 
-    restart_test_button = tk.Button(root, text="重新測試", command=restart_test, font=("Helvetica", 16))
+    restart_test_button = tk.Button(root, text="重新測試", command=restart_test, font=CONST_FONT_TUPLE)
     restart_test_button.pack(pady=10)
-
-
 
     # Play the first word
     speak_word(word_list[0])
