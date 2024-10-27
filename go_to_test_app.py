@@ -2,7 +2,11 @@ import datetime
 import json 
 import random
 import tkinter as tk
+
 from tkinter import messagebox
+from tkinter import ttk
+from tkinter import simpledialog
+from RangeSlider.RangeSlider import RangeSliderH, RangeSliderV
 import pyttsx3
 import logging
 from tkinter import font as tkFont
@@ -10,21 +14,92 @@ import winsound
 from PIL import Image, ImageTk
 
 
-CONST_CURRENT_TEST_DATA_SET = "1A" # "1A" or "AL"
+CONST_CURRENT_TEST_DATA_SET = "NONE" # "1A" or "AL"
+gamer_id = "NONE"
 
-gamer_id = "Vic"
+q_start_idx = 31
+q_end_idx = 40
 
-# Configure logger
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s',
-                    handlers=[
-                        logging.FileHandler(f"testing_{CONST_CURRENT_TEST_DATA_SET}_{gamer_id}.log"),
-                        logging.StreamHandler()
-                    ])
+logger = None
+logger_name = 'spelling_bee_logger'
+log_filehandler = None
 
-logger = logging.getLogger()
+log_stream_handler = logging.StreamHandler()
+
+def reset_logger():
+    global log_filehandler
+    _logger = logging.getLogger(__name__)
+    _logger.setLevel(logging.INFO)
+    if log_filehandler is not None:
+        _logger.removeHandler(log_filehandler)
+    log_filehandler = logging.FileHandler(f"testing_{CONST_CURRENT_TEST_DATA_SET}_{gamer_id}.log")    
+    _logger.addHandler(log_filehandler)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    log_filehandler.setFormatter(formatter)
+    log_stream_handler.setFormatter(formatter)
+    if log_stream_handler not in _logger.handlers:
+        _logger.addHandler(log_stream_handler)
+
+    return _logger
+
+logger = reset_logger()
+
+
+def show_input_dialog():
+    dialog = tk.Toplevel()
+    dialog.title("Select Name")
+
+    tk.Label(dialog, text="請選擇一個名字:").pack(pady=10)
+
+    name_var = tk.StringVar()
+    name_combobox = ttk.Combobox(dialog, textvariable=name_var)
+    name_combobox['values'] = ("Vic", "Ethan")
+    name_combobox.current(0)
+    name_combobox.pack(pady=10, padx=10)
+
+    test_paper = tk.StringVar()
+    test_paper_combobox = ttk.Combobox(dialog, textvariable=test_paper)
+    test_paper_combobox['values'] = ("AL", "1A")
+    test_paper_combobox.current(0)
+    test_paper_combobox.pack(pady=10, padx=10)
+
+    hLeft = tk.IntVar(value = 31)  #left handle variable initialised to value 0.2
+    hRight = tk.IntVar(value = 40)  #right handle variable initialised to value 0.85
+    hSlider = RangeSliderH( dialog , [hLeft, hRight], digit_precision='.0f',padX = 25, min_val=1, max_val=84, step_marker = True, step_size = 1)   #horizontal slider
+    hSlider.pack()   # or grid or place method could be used
+
+
+    
+    def on_ok():
+        global gamer_id
+        global CONST_CURRENT_TEST_DATA_SET
+        global q_start_idx, q_end_idx
+        selected_name = name_var.get()
+        if selected_name:
+            gamer_id = selected_name
+            CONST_CURRENT_TEST_DATA_SET = test_paper.get()
+            q_start_idx = hLeft.get()
+            q_end_idx = hRight.get()
+
+            print(gamer_id, CONST_CURRENT_TEST_DATA_SET)
+            print(q_start_idx, q_end_idx)
+
+            dialog.destroy()
+            root.deiconify()  # 顯示主視窗
+        else:
+            tk.messagebox.showwarning("Warning", "請選擇一個名字")
+
+    ok_button = tk.Button(dialog, text="確定", command=on_ok)
+    ok_button.pack(pady=10)
+
+    dialog.transient(root)  # 將對話框設置為模式對話框
+    dialog.grab_set()  # 獲取焦點
+    root.wait_window(dialog)
+
+
 
 def log_data(message, level="info"):
+    global logger
     if level == "debug":
         logger.debug(message)
     elif level == "info":
@@ -38,12 +113,14 @@ def log_data(message, level="info"):
     else:
         logger.info(message)
 
+def ddd_x(obj, x):
+    obj.destroy()
 
 def custom_messagebox(title, message, font, icon=None):
     global root
     root.update_idletasks()
     custom_box = tk.Toplevel()
-    
+    custom_box.bind("<Return>", lambda x: ddd_x(custom_box,x))
     x = root.winfo_x() + (root.winfo_width() // 2) - (custom_box.winfo_reqwidth() // 2)
     y = root.winfo_y() + (root.winfo_height() // 2) - (custom_box.winfo_reqheight() // 2)
     custom_box.geometry(f"+{x}+{y}")
@@ -66,6 +143,11 @@ def custom_messagebox(title, message, font, icon=None):
     
     custom_box.transient(root)  # 將對話框設置為模式對話框
     custom_box.grab_set()  # 獲取焦點
+
+    # 設置焦點在對話框的確定上
+    ok_button.focus_set()
+
+    
     root.wait_window(custom_box)  # 等待對話框關閉
 
 
@@ -136,8 +218,6 @@ def check_word():
         correct += 1
         # Play the "yes.wav" sound
         winsound.PlaySound("yes.wav", winsound.SND_FILENAME)
-
-
         custom_messagebox("Result", "Correct!", font=custom_font_tuple, icon="r.jpg")
         log_data("O: "+word_list[n_current_idx])
 
@@ -183,9 +263,12 @@ def restart_test():
 
 
 def load_data_set():
+
+    global CONST_CURRENT_TEST_DATA_SET
+    global q_start_idx, q_end_idx
     _word_list = []
     if CONST_CURRENT_TEST_DATA_SET == "1A":
-        idx_useful =(1, 70)
+        idx_useful =(q_start_idx, q_end_idx)
         # idx_reading = (0, -1)
         with open('1A_useful_words.json', 'r') as f:
             dic_words = json.load(f)
@@ -197,12 +280,12 @@ def load_data_set():
         #     _word_list.append(dic_words[str(i)])
     else:
         #AL
-        ids_t = (1, 30)
+        ids_t = (q_start_idx, q_end_idx)
         with open('5_spelling_bee.json', 'r') as f:
             dic_words = json.load(f)
-        for i in range(ids_t[0], ids_t[0]+1):
+        for i in range(ids_t[0], ids_t[1]+1):
             _word_list.append(dic_words[str(i)])
-    log_data(f'This time word list:{word_list}')
+    log_data(f'This time word list:{_word_list}')
     return _word_list
 
 
@@ -211,14 +294,17 @@ def main():
     global root, entry, label_current_progress
     global n_total
     global custom_font
-    word_list = load_data_set()
-
-    random.shuffle(word_list)
-
-    
+    global logger
 
     # Create the main window
     root = tk.Tk()
+
+    show_input_dialog()
+    word_list = load_data_set()
+    random.shuffle(word_list)
+
+    logger = reset_logger()
+
     root.title("Word Test")
 
     
@@ -226,6 +312,7 @@ def main():
 
     # Create and place widgets
     entry = tk.Entry(root, font=CONST_FONT_TUPLE)
+    entry.bind("<Return>", lambda x: check_word())
     entry.pack(pady=20)
 
     n_total = len(word_list)
@@ -249,7 +336,7 @@ def main():
 
     # Play the first word
     speak_word(word_list[0])
-
+    entry.focus_set()
     # Start the GUI event loop
     root.mainloop()
 
