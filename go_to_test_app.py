@@ -59,7 +59,7 @@ def show_input_dialog():
 
     test_paper = tk.StringVar()
     test_paper_combobox = ttk.Combobox(dialog, textvariable=test_paper)
-    test_paper_combobox['values'] = ("AL", "1A")
+    test_paper_combobox['values'] = ("AL", "1A", "1ARS")
     test_paper_combobox.current(0)
     test_paper_combobox.pack(pady=10, padx=10)
 
@@ -274,10 +274,12 @@ def load_data_set():
             dic_words = json.load(f)
         for i in range(idx_useful[0], idx_useful[1]+1):
             _word_list.append(dic_words[str(i)])
-        # with open('1A_reading_science.json', 'r') as f:
-        #     dic_words = json.load(f)
-        # for i in range(idx_reading[0], idx_reading[1]+1):
-        #     _word_list.append(dic_words[str(i)])
+    elif CONST_CURRENT_TEST_DATA_SET == "1ARS":
+        idxs =(q_start_idx, q_end_idx)
+        with open('1A_reading_science.json', 'r') as f:
+            dic_words = json.load(f)
+        for i in range(idxs[0], idxs[1]+1):
+            _word_list.append(dic_words[str(i)])
     else:
         #AL
         ids_t = (q_start_idx, q_end_idx)
@@ -310,6 +312,11 @@ def main():
     
     root.geometry("400x600")  # Set the window size
 
+
+    str_paper_title = f"考生: {gamer_id}, {CONST_CURRENT_TEST_DATA_SET} 測驗, 題目: {q_start_idx}~{q_end_idx}"
+    label_title = tk.Label(root, text=str_paper_title, font=CONST_FONT_TUPLE)
+    label_title.pack(pady=10)
+
     # Create and place widgets
     entry = tk.Entry(root, font=CONST_FONT_TUPLE)
     entry.bind("<Return>", lambda x: check_word())
@@ -333,6 +340,12 @@ def main():
 
     restart_test_button = tk.Button(root, text="重新測試", command=restart_test, font=CONST_FONT_TUPLE)
     restart_test_button.pack(pady=10)
+
+
+
+
+
+
 
     # Play the first word
     speak_word(word_list[0])
