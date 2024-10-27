@@ -270,20 +270,20 @@ def load_data_set():
     if CONST_CURRENT_TEST_DATA_SET == "1A":
         idx_useful =(q_start_idx, q_end_idx)
         # idx_reading = (0, -1)
-        with open('1A_useful_words.json', 'r') as f:
+        with open('1A', 'r') as f:
             dic_words = json.load(f)
         for i in range(idx_useful[0], idx_useful[1]+1):
             _word_list.append(dic_words[str(i)])
     elif CONST_CURRENT_TEST_DATA_SET == "1ARS":
         idxs =(q_start_idx, q_end_idx)
-        with open('1A_reading_science.json', 'r') as f:
+        with open('1ARS.json', 'r') as f:
             dic_words = json.load(f)
         for i in range(idxs[0], idxs[1]+1):
             _word_list.append(dic_words[str(i)])
     else:
         #AL
         ids_t = (q_start_idx, q_end_idx)
-        with open('5_spelling_bee.json', 'r') as f:
+        with open('AL.json', 'r') as f:
             dic_words = json.load(f)
         for i in range(ids_t[0], ids_t[1]+1):
             _word_list.append(dic_words[str(i)])
