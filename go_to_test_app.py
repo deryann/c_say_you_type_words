@@ -13,6 +13,7 @@ from tkinter import font as tkFont
 import winsound
 from PIL import Image, ImageTk
 
+APP_CFG_FILENAME = "app_cfg.json"
 
 CONST_CURRENT_TEST_DATA_SET = "NONE" # "1A" or "AL"
 gamer_id = "NONE"
@@ -53,7 +54,11 @@ def show_input_dialog():
 
     name_var = tk.StringVar()
     name_combobox = ttk.Combobox(dialog, textvariable=name_var)
-    name_combobox['values'] = ("Vic", "Ethan")
+    
+    with open(APP_CFG_FILENAME, 'r') as f:
+        cfg = json.load(f)
+
+    name_combobox['values'] = cfg.get("Users", ["USER1", "USER2", "USER3"])
     name_combobox.current(0)
     name_combobox.pack(pady=10, padx=10)
 
