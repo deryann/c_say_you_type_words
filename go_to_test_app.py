@@ -1,3 +1,4 @@
+import os 
 import datetime 
 import json 
 import random
@@ -12,8 +13,18 @@ import logging
 from tkinter import font as tkFont
 import winsound
 from PIL import Image, ImageTk
+from glob import glob 
 
 APP_CFG_FILENAME = "app_cfg.json"
+
+WORDS_CFG_FOLDER = 'cfg'
+
+words_lst = glob( os.path.join(f'{WORDS_CFG_FOLDER}','*.json'))
+
+words_map_from_basename_to_fullpath = {os.path.basename(word_cfg_file).split('.')[0]: word_cfg_file for word_cfg_file in words_lst}
+words_map_from_basenames = list(words_map_from_basename_to_fullpath.keys())
+
+
 
 CONST_CURRENT_TEST_DATA_SET = "NONE" # "1A" or "AL"
 gamer_id = "NONE"
@@ -64,7 +75,9 @@ def show_input_dialog():
 
     test_paper = tk.StringVar()
     test_paper_combobox = ttk.Combobox(dialog, textvariable=test_paper)
-    test_paper_combobox['values'] = ("AL", "1A", "1ARS")
+
+
+    test_paper_combobox['values'] = words_map_from_basenames
     test_paper_combobox.current(0)
     test_paper_combobox.pack(pady=10, padx=10)
 
@@ -268,30 +281,16 @@ def restart_test():
 
 
 def load_data_set():
-
+    global words_map_from_basename_to_fullpath
     global CONST_CURRENT_TEST_DATA_SET
     global q_start_idx, q_end_idx
     _word_list = []
-    if CONST_CURRENT_TEST_DATA_SET == "1A":
-        idx_useful =(q_start_idx, q_end_idx)
-        # idx_reading = (0, -1)
-        with open('1A.json', 'r') as f:
-            dic_words = json.load(f)
-        for i in range(idx_useful[0], idx_useful[1]+1):
-            _word_list.append(dic_words[str(i)])
-    elif CONST_CURRENT_TEST_DATA_SET == "1ARS":
-        idxs =(q_start_idx, q_end_idx)
-        with open('1ARS.json', 'r') as f:
-            dic_words = json.load(f)
-        for i in range(idxs[0], idxs[1]+1):
-            _word_list.append(dic_words[str(i)])
-    else:
-        #AL
-        ids_t = (q_start_idx, q_end_idx)
-        with open('AL.json', 'r') as f:
-            dic_words = json.load(f)
-        for i in range(ids_t[0], ids_t[1]+1):
-            _word_list.append(dic_words[str(i)])
+    idxs = (q_start_idx, q_end_idx)
+    with open(words_map_from_basename_to_fullpath[CONST_CURRENT_TEST_DATA_SET], 'r') as f:
+        dic_words = json.load(f)
+    for i in range(idxs[0], idxs[1]+1):
+        _word_list.append(dic_words[str(i)])
+            
     log_data(f'This time word list:{_word_list}')
     return _word_list
 
