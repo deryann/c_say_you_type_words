@@ -15,6 +15,10 @@ import winsound
 from PIL import Image, ImageTk
 from glob import glob 
 
+# 每次更新 random set eed 
+random.seed(datetime.datetime.now())
+
+
 APP_CFG_FILENAME = "app_cfg.json"
 
 WORDS_CFG_FOLDER = 'cfg'
@@ -28,6 +32,7 @@ words_map_from_basenames = list(words_map_from_basename_to_fullpath.keys())
 
 CONST_CURRENT_TEST_DATA_SET = "NONE" # "1A" or "AL"
 gamer_id = "NONE"
+b_random_choice = False 
 
 q_start_idx = 31
 q_end_idx = 40
@@ -58,6 +63,7 @@ logger = reset_logger()
 
 
 def show_input_dialog():
+    global b_random_choice
     dialog = tk.Toplevel()
     dialog.title("Select Name")
 
@@ -81,17 +87,21 @@ def show_input_dialog():
     test_paper_combobox.current(0)
     test_paper_combobox.pack(pady=10, padx=10)
 
+
     hLeft = tk.IntVar(value = 31)  #left handle variable initialised to value 0.2
     hRight = tk.IntVar(value = 40)  #right handle variable initialised to value 0.85
     hSlider = RangeSliderH( dialog , [hLeft, hRight], digit_precision='.0f',padX = 25, min_val=1, max_val=84, step_marker = True, step_size = 1)   #horizontal slider
     hSlider.pack()   # or grid or place method could be used
 
-
+    b_random_choice = tk.BooleanVar()
+    random_choice_checkbox = tk.Checkbutton(dialog, text="亂數 20 題", variable=b_random_choice)
+    random_choice_checkbox.pack(pady=10)
     
     def on_ok():
         global gamer_id
         global CONST_CURRENT_TEST_DATA_SET
         global q_start_idx, q_end_idx
+        global b_random_choice
         selected_name = name_var.get()
         if selected_name:
             gamer_id = selected_name
@@ -284,14 +294,22 @@ def load_data_set():
     global words_map_from_basename_to_fullpath
     global CONST_CURRENT_TEST_DATA_SET
     global q_start_idx, q_end_idx
+    global logger
+    global b_random_choice
+
     _word_list = []
     idxs = (q_start_idx, q_end_idx)
     with open(words_map_from_basename_to_fullpath[CONST_CURRENT_TEST_DATA_SET], 'r') as f:
         dic_words = json.load(f)
+
     for i in range(idxs[0], idxs[1]+1):
         _word_list.append(dic_words[str(i)])
+
+    if b_random_choice and len(_word_list) > 20:
+        _word_list = random.sample(_word_list, 20)
             
     log_data(f'This time word list:{_word_list}')
+
     return _word_list
 
 
