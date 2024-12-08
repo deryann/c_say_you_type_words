@@ -90,7 +90,7 @@ def show_input_dialog():
 
     hLeft = tk.IntVar(value = 31)  #left handle variable initialised to value 0.2
     hRight = tk.IntVar(value = 40)  #right handle variable initialised to value 0.85
-    hSlider = RangeSliderH( dialog , [hLeft, hRight], digit_precision='.0f',padX = 25, min_val=1, max_val=84, step_marker = True, step_size = 1)   #horizontal slider
+    hSlider = RangeSliderH( dialog , [hLeft, hRight], digit_precision='.0f',padX = 25, min_val=1, max_val=130, step_marker = True, step_size = 1)   #horizontal slider
     hSlider.pack()   # or grid or place method could be used
 
     b_random_choice = tk.BooleanVar()
