@@ -34,8 +34,8 @@ CONST_CURRENT_TEST_DATA_SET = "NONE" # "1A" or "AL"
 gamer_id = "NONE"
 b_random_choice = False 
 
-q_start_idx = 31
-q_end_idx = 40
+q_start_idx = 1
+q_end_idx = 130
 
 logger = None
 logger_name = 'spelling_bee_logger'
@@ -52,10 +52,12 @@ def reset_logger():
     log_filehandler = logging.FileHandler(f"testing_{CONST_CURRENT_TEST_DATA_SET}_{gamer_id}.log")    
     _logger.addHandler(log_filehandler)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    
     log_filehandler.setFormatter(formatter)
-    log_stream_handler.setFormatter(formatter)
-    if log_stream_handler not in _logger.handlers:
-        _logger.addHandler(log_stream_handler)
+
+    # log_stream_handler.setFormatter(formatter)
+    # if log_stream_handler not in _logger.handlers:
+    #     _logger.addHandler(log_stream_handler)
 
     return _logger
 
@@ -88,12 +90,13 @@ def show_input_dialog():
     test_paper_combobox.pack(pady=10, padx=10)
 
 
-    hLeft = tk.IntVar(value = 31)  #left handle variable initialised to value 0.2
-    hRight = tk.IntVar(value = 40)  #right handle variable initialised to value 0.85
+    hLeft = tk.IntVar(value = 1)  #left handle variable initialised to value 0.2
+    hRight = tk.IntVar(value = 130)  #right handle variable initialised to value 0.85
     hSlider = RangeSliderH( dialog , [hLeft, hRight], digit_precision='.0f',padX = 25, min_val=1, max_val=130, step_marker = True, step_size = 1)   #horizontal slider
     hSlider.pack()   # or grid or place method could be used
 
     b_random_choice = tk.BooleanVar()
+
     random_choice_checkbox = tk.Checkbutton(dialog, text="亂數 20 題", variable=b_random_choice)
     random_choice_checkbox.pack(pady=10)
     
